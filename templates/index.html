@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديد الموقع الجغرافي</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; }
+        button { padding: 10px 20px; font-size: 16px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #status { margin-top: 15px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>تطبيق تحديد الموقع الجغرافي</h2>
+        <p>اضغط على الزر أدناه لمشاركة موقعك الحالي:</p>
+        <button onclick="getLocation()">مشاركة موقعي</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        function getLocation() {
+            const status = document.getElementById('status');
+            if (!navigator.geolocation) {
+                status.innerText = 'الجيولوكيشن غير مدعوم في متصفحك.';
+                return;
+            }
+            status.innerText = 'جاري جلب الموقع...';
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    fetch('/location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ latitude: lat, longitude: lon })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        status.innerText = 'تم إرسال موقعك بنجاح!';
+                    })
+                    .catch(err => {
+                        status.innerText = 'حدث خطأ أثناء إرسال البيانات.';
+                    });
+                },
+                () => {
+                    status.innerText = 'تعذر الحصول على موقعك. يرجى تفعيل الـ GPS والسماح بالوصول.';
+                }
+            );
+        }
+    </script>
+</body>
+  </html>
+  
